@@ -8,13 +8,15 @@ $(document).ready(function(){
         }
     });
 
-    $('.list').on('click', 'span', function(){
-        removeTodo($(this).parent());
+    $('.list').on('click', 'li', function() {
+        updateTodo($(this));
     });
 
-
+    $('.list').on('click', 'span', function(e){
+        e.stopPropagation();
+        removeTodo($(this).parent());
+    });
 });
-
 
 function addTodos(todos) {
     todos.forEach(function(todo){
@@ -26,7 +28,7 @@ function addTodos(todos) {
 function addTodo(todo){
     const newTodo = $('<li class="task">' + todo.name + ' <span>X</span></li>');
     newTodo.data('id', todo._id);
-    console.log(newTodo);
+    newTodo.data('completed', todo.completed);
     if (todo.completed){
         newTodo.addClass('done');
     }
@@ -57,5 +59,21 @@ function removeTodo(todo) {
     })
     .catch(function(err){
         console.log(err);
+    });
+}
+
+function updateTodo(todo) {
+    const updateUrl = '/api/todos/' + todo.data('id');
+    const isDone = !todo.data('completed');
+    const updateData = {completed: isDone};
+    $.ajax({
+        method: 'PUT',
+        url: updateUrl,
+        data: updateData
+    })
+    .then(function(updatedTodo){
+        console.log(todo.data('completed'));
+        todo.toggleClass('done');
+        todo.data('completed', isDone);
     });
 }
